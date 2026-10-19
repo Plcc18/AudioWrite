@@ -1,0 +1,25 @@
+# Claude Code local project state (not part of the app)
+.claude/
+
+# Env files (every real .env lives under backend/ or frontend/, already
+# covered by their own .gitignore, but keep a root-level backstop too)
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# OS / editor
+.DS_Store
+*.local

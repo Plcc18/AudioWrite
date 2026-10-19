@@ -1,0 +1,40 @@
+# Worker dependencies. Meant to be installed on whatever machine runs the
+# transcription (your laptop, a Colab notebook, a GPU box, ...) — independent
+# from the API's requirements.txt.
+faster-whisper==1.1.0
+# Pin av explicitly: faster-whisper 1.1.0 only declares "av>=11" with no upper
+# bound, and newer av releases (19.x, pulled in by default) dropped the
+# metadata_errors kwarg that faster-whisper's audio decoder passes to av.open(),
+# breaking every transcription with "TypeError: open() got an unexpected
+# keyword argument 'metadata_errors'".
+av==13.1.0
+requests==2.32.3
+psycopg2-binary==2.9.10
+# Pinned >=2.33: older supabase-py versions reject the newer sb_secret_/sb_publishable_ API key formats.
+supabase==2.33.0
+python-dotenv==1.0.1
+
+# --- Speaker diarization (opcional, ver worker/diarize.py) ---
+# Pesado: instala torch/torchaudio (build CPU por padrão, ~1-2GB). Se
+# DIARIZATION_ENABLED=false, essas libs não são sequer importadas (import
+# tardio em worker/diarize.py) — só o import aqui no requirements.txt que não
+# tem como ser "opcional" de fato. Remova estas 3 linhas se não quiser essa
+# dependência de jeito nenhum.
+pyannote.audio==3.3.2
+# torch==2.5.1 (a versão "oficialmente" testada com pyannote.audio 3.3.2) não
+# tem wheel para Python 3.13 — pip falha com "No matching distribution found".
+# pyannote.audio só exige torch>=2.0.0/torchaudio>=2.2.0 (sem teto), então
+# usamos a versão mais recente com wheel pronto para 3.13 no momento.
+torch==2.7.1
+torchaudio==2.7.1
+# pyannote.audio 3.3.2 chama huggingface_hub.hf_hub_download(..., use_auth_token=...)
+# internamente (Pipeline.from_pretrained) — não controlamos essa chamada.
+# huggingface_hub tirou esse parâmetro no bump de versão major (1.0/2.0), e como
+# pyannote.audio não fixa um teto ("huggingface_hub>=0.13.0"), pip puxa a versão
+# mais nova por padrão e a diarização quebra com "TypeError: hf_hub_download()
+# got an unexpected keyword argument 'use_auth_token'". Fixamos a última 0.x.
+huggingface_hub==0.36.2
+# pyannote.audio importa matplotlib.pyplot em pyannote/audio/tasks/segmentation/mixins.py
+# (módulo carregado sempre, no import de Pipeline), mas não o declara como
+# dependência — sem isso, ModuleNotFoundError: No module named 'matplotlib'.
+matplotlib==3.11.2
